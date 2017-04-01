@@ -1,5 +1,6 @@
 package com.c_schone.apps.geoquiz;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,11 +17,13 @@ public class QuizActivity extends AppCompatActivity {
     private static final String ANSWER_INDEX = "answers";
     private static final String ANSWER_COUNTER = "questionsAnswered";
     private static final String CORRECT_COUNTER = "correctAnswers";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mNextButton;
     private Button mPrevButton;
+    private Button mCheatButton;
     /**
      * Challenge Chapter 2
      * private ImageButton mNextImageButton;
@@ -66,15 +69,17 @@ public class QuizActivity extends AppCompatActivity {
         }
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
+
         /**
          * Chapter 2 Challenge 1: Add Listener to the TextView
+         *
+         * mQuestionTextView.setOnClickListener(new View.OnClickListener() {
+         *  @Override
+         *  public void onClick(View v) {
+         *      nextQuestion(1);
+         *  }
+         * });
          */
-        mQuestionTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                nextQuestion(1);
-            }
-        });
 
         mTrueButton = (Button) findViewById(R.id.true_button);
         mTrueButton.setOnClickListener(new View.OnClickListener() {
@@ -148,6 +153,17 @@ public class QuizActivity extends AppCompatActivity {
          * }
          * });
          */
+
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Start CheatActivity
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                startActivityForResult(intent, REQUEST_CODE_CHEAT);
+            }
+        });
 
 
         updateQuestion();
@@ -235,7 +251,7 @@ public class QuizActivity extends AppCompatActivity {
      * Iterates forward or backward depending on next
      */
     private void nextQuestion(int next) {
-        mCurrentIndex = ((mCurrentIndex + next) % mQuestionBank.length + mQuestionBank.length) % mQuestionBank.length;
+        mCurrentIndex = ((mCurrentIndex + next) + mQuestionBank.length) % mQuestionBank.length;
         updateQuestion();
     }
 
