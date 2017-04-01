@@ -13,6 +13,9 @@ public class QuizActivity extends AppCompatActivity {
 
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final String ANSWER_INDEX = "answers";
+    private static final String ANSWER_COUNTER = "questionsAnswered";
+    private static final String CORRECT_COUNTER = "correctAnswers";
 
     private Button mTrueButton;
     private Button mFalseButton;
@@ -34,6 +37,19 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_asia, true),
     };
 
+    /**
+     * Chapter 3 Challenge 1
+     */
+    private boolean[] mAnswered = new boolean[] {
+            false, false, false, false, false, false
+    };
+
+    /**
+     * Chapter 3 Challenge 2
+     */
+    private int mCorrectAnswered = 0;
+    private int mQuestionsAnswered = 0;
+
     private int mCurrentIndex = 0;
 
     @Override
@@ -44,6 +60,9 @@ public class QuizActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+            mAnswered = savedInstanceState.getBooleanArray(ANSWER_INDEX);
+            mQuestionsAnswered = savedInstanceState.getInt(ANSWER_COUNTER, 0);
+            mCorrectAnswered = savedInstanceState.getInt(CORRECT_COUNTER, 0);
         }
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
@@ -157,6 +176,9 @@ public class QuizActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putBooleanArray(ANSWER_INDEX, mAnswered);
+        savedInstanceState.putInt(ANSWER_COUNTER, mQuestionsAnswered);
+        savedInstanceState.putInt(CORRECT_COUNTER, mCorrectAnswered);
     }
 
     @Override
@@ -174,20 +196,37 @@ public class QuizActivity extends AppCompatActivity {
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
+        buttonEnabler();
     }
 
     private void checkAnswer (boolean userPressedTrue) {
+        mQuestionsAnswered++;
         boolean isTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
 
         int messageResId = 0;
 
         if (isTrue == userPressedTrue) {
+            mCorrectAnswered++;
             messageResId = R.string.correct_toast;
         } else {
             messageResId = R.string.incorrect_toast;
         }
 
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+
+        /**
+         * Disable answer buttons
+         */
+        mAnswered[mCurrentIndex] = true;
+        buttonEnabler();
+
+        /**
+         * Chapter 3 Challenge 2
+         */
+        if (mQuestionsAnswered == 6) {
+            Log.d(TAG, "mCorrect: " + mCorrectAnswered + ", mQuestionsAnswered: " + mQuestionsAnswered);
+            Toast.makeText(this, "Correct answers: " + mCorrectAnswered * 100 / mQuestionsAnswered + "%", Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
@@ -198,5 +237,20 @@ public class QuizActivity extends AppCompatActivity {
     private void nextQuestion(int next) {
         mCurrentIndex = ((mCurrentIndex + next) % mQuestionBank.length + mQuestionBank.length) % mQuestionBank.length;
         updateQuestion();
+    }
+
+    /**
+     * Chapter 3 Challenge
+     * Help function
+     * Enables or disables buttons for answering
+     */
+    private void buttonEnabler() {
+        if (mAnswered[mCurrentIndex]) {
+            mTrueButton.setEnabled(false);
+            mFalseButton.setEnabled(false);
+        } else {
+            mTrueButton.setEnabled(true);
+            mFalseButton.setEnabled(true);
+        }
     }
 }
