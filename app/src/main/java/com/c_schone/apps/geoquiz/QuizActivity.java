@@ -20,6 +20,7 @@ public class QuizActivity extends AppCompatActivity {
     private static final String CORRECT_COUNTER = "correctAnswers";
     private static final int REQUEST_CODE_CHEAT = 0;
     private static final String IS_CHEATING = "hasCheated";
+    private static final String CHEAT_COUNT = "cheatsCounted";
 
     private Button mTrueButton;
     private Button mFalseButton;
@@ -66,6 +67,11 @@ public class QuizActivity extends AppCompatActivity {
     //deprecated
     //private boolean mIsCheater;
 
+    /**
+     * Chapter 6 Challenge 2
+     */
+    private int mCheatCounter = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +84,7 @@ public class QuizActivity extends AppCompatActivity {
             mQuestionsAnswered = savedInstanceState.getInt(ANSWER_COUNTER, 0);
             mCorrectAnswered = savedInstanceState.getInt(CORRECT_COUNTER, 0);
             mCheated = savedInstanceState.getBooleanArray(IS_CHEATING);
+            mCheatCounter = savedInstanceState.getInt(CHEAT_COUNT, 0);
         }
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
@@ -177,7 +184,6 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
-
         updateQuestion();
     }
 
@@ -191,7 +197,11 @@ public class QuizActivity extends AppCompatActivity {
             if (data == null) {
                 return;
             }
-            mCheated[mCurrentIndex] = CheatActivity.wasAnswerShown(data);
+            boolean temp = CheatActivity.wasAnswerShown(data);
+            mCheated[mCurrentIndex] = temp;
+            if (temp) {
+                mCheatCounter++;
+            }
         }
     }
 
@@ -222,6 +232,7 @@ public class QuizActivity extends AppCompatActivity {
         savedInstanceState.putInt(ANSWER_COUNTER, mQuestionsAnswered);
         savedInstanceState.putInt(CORRECT_COUNTER, mCorrectAnswered);
         savedInstanceState.putBooleanArray(IS_CHEATING, mCheated);
+        savedInstanceState.putInt(CHEAT_COUNT, mCheatCounter);
     }
 
     @Override
@@ -289,9 +300,9 @@ public class QuizActivity extends AppCompatActivity {
     }
 
     /**
-     * Chapter 3 Challenge
+     * Chapter 3 Challenge + Chapter 6 Challenge 2
      * Help function
-     * Enables or disables buttons for answering
+     * Enables or disables buttons for answering and cheating
      */
     private void buttonEnabler() {
         if (mAnswered[mCurrentIndex]) {
@@ -300,6 +311,11 @@ public class QuizActivity extends AppCompatActivity {
         } else {
             mTrueButton.setEnabled(true);
             mFalseButton.setEnabled(true);
+        }
+        if (mCheatCounter == 3) {
+            mCheatButton.setEnabled(false);
+        } else {
+            mCheatButton.setEnabled(true);
         }
     }
 }
